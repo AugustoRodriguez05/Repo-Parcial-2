@@ -1,4 +1,4 @@
--Para el Ejercicio de la Excepción (Ejercicio 2)
+1.Para el Ejercicio de la Excepción (Ejercicio 2)
 A. Crear la clase de la excepción: Copia esto si te piden crear la clase PuertosInsuficientesException.
 
 public class PuertosInsuficientesException extends Exception {
@@ -19,7 +19,7 @@ B. Usar la excepción en el Constructor: Copia esto dentro del constructor de la
 
 
 
--Para el Ejercicio de la Interface / Precios (Ejercicio 1)
+2.Para el Ejercicio de la Interface / Precios (Ejercicio 1)
 A. En la clase Escritorio: Copia este método dentro de la clase Escritorio.
 @Override
     public double calcularPrecioVenta(double precioBase, int anioActual) {
@@ -48,7 +48,7 @@ B. En la clase Laptop: Copia este método dentro de la clase Laptop.
 
 
 
--Para el Ejercicio de Igualdad / Equals (Ejercicio 3)
+3.Para el Ejercicio de Igualdad / Equals (Ejercicio 3)
 Copia estos dos métodos dentro de la clase padre Computadora.
 @Override
     public boolean equals(Object obj) {
@@ -66,7 +66,7 @@ Copia estos dos métodos dentro de la clase padre Computadora.
 
 
 
--Para el Ejercicio de Búsqueda (Ejercicio 4)
+4.Para el Ejercicio de Búsqueda (Ejercicio 4)
 Copia este método dentro de la clase InventarioComputadoras.
 public Computadora buscarComputadora(String serie) {
         // 1. Primero busca en escritorios
