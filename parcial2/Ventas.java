@@ -1,0 +1,280 @@
+package Parciales.Parcial2025.Segundo.Concesionario;
+
+import java.util.ArrayList;
+import java.util.List;
+
+// ==================================================================================
+// EJERCICIO 1: LA INTERFAZ (Contrato de ventas) - VERSIÓN FINAL
+// ==================================================================================
+public interface Ventas {
+
+    /**
+     * Calcula el precio de venta del vehículo basado en el precio base y el año
+     * actual
+     * */
+    double calcularPrecioVenta(double precioBase, int anioActual);
+}
+
+// ==================================================================================
+// EJERCICIO 2: LA EXCEPCIÓN (Checked)
+// Requerida por la clase Auto para validar puertas.
+// ==================================================================================
+/**
+ * Excepción personalizada que se lanza cuando se intenta crear un auto
+ * con menos de 3 puertas.
+ * * Esta es una excepción verificada (checked exception) que debe ser
+ * manejada obligatoriamente por el código que llama.
+ */
+class PuertasInsuficientesException extends Exception {
+    
+    /**
+     * Constructor que recibe un mensaje personalizado
+     * * @param mensaje El mensaje descriptivo del error
+     */
+    public PuertasInsuficientesException(String mensaje) {
+        super(mensaje);
+    }
+
+    /**
+     * Constructor por defecto con mensaje predeterminado
+     */
+    public PuertasInsuficientesException() {
+        super("Error: Un auto debe tener al menos 3 puertas");
+    }
+}
+
+// ==================================================================================
+// CLASE PADRE: VEHICULO (Versión final con Getters/Setters y lógica de mayúsculas)
+// Aquí resolvemos el EJERCICIO 3 (Equals y HashCode por Patente)
+// ==================================================================================
+abstract class Vehiculo {
+    protected String marca;
+    protected int modelo; // Año
+    protected String patente;
+    protected int kilometraje;
+
+    // Constructor con lógica de .toUpperCase()
+    public Vehiculo(String marca, int modelo, String patente, int kilometraje) {
+        this.marca = marca.toUpperCase();
+        this.modelo = modelo;
+        this.patente = patente.toUpperCase();
+        this.kilometraje = kilometraje;
+    }
+
+    // Getters
+    public String getMarca() { return marca; }
+    public int getModelo() { return modelo; } // Necesario para calcular años de uso
+    public String getPatente() { return patente; }
+    public int getKilometraje() { return kilometraje; }
+
+    // Setters
+    public void setMarca(String marca) { this.marca = marca; }
+    public void setModelo(int modelo) { this.modelo = modelo; }
+    public void setPatente(String patente) { this.patente = patente; }
+    public void setKilometraje(int kilometraje) { this.kilometraje = kilometraje; }
+
+    public abstract String verTipoDeVehiculo();
+
+    // Método toString
+    @Override
+    public String toString() {
+        return marca + "'\t" + modelo + "\t" + patente + "\t" + kilometraje + "Km";
+    }
+
+    // --- EJERCICIO 3: IGUALDAD BASADA EN PATENTE (USANDO getClass()) ---
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        // La condición es estricta: debe ser de la misma clase exacta
+        if (obj == null || getClass() != obj.getClass()) return false; 
+        
+        Vehiculo vehiculo = (Vehiculo) obj;
+        // Asumimos que patente nunca es null después del constructor
+        return patente.equals(vehiculo.patente);
+    }
+
+    @Override
+    public int hashCode() {
+        return patente.hashCode();
+    }
+}
+
+// ==================================================================================
+// CLASE AUTO
+// Usa la Excepción (Ejercicio 2) e implementa Ventas
+// ==================================================================================
+class Auto extends Vehiculo implements Ventas {
+    private int cantPuertas;
+
+    public Auto(String marca, int modelo, String patente, int kilometraje, int cantPuertas)
+            throws PuertasInsuficientesException {
+        // Llama al constructor actualizado de Vehiculo
+        super(marca, modelo, patente, kilometraje);
+        
+        // Validación del Ejercicio 2
+        if (cantPuertas < 3) {
+            throw new PuertasInsuficientesException("Un auto debe tener al menos 3 puertas.");
+        }
+        this.cantPuertas = cantPuertas;
+    }
+
+    @Override
+    public double calcularPrecioVenta(double precioBase, int anioActual) {
+        int aniosUso = anioActual - this.modelo;
+        double precio = precioBase - (precioBase * (aniosUso * 0.05)); // Depreciación 5%
+        
+        // Lógica de puertas
+        if (cantPuertas == 3) precio *= 1.30;
+        else if (cantPuertas == 4) precio *= 1.40;
+        else precio *= 1.35;
+        
+        return precio;
+    }
+
+    @Override
+    public String verTipoDeVehiculo() { return "🚗 Auto"; }
+    
+    // Sobrescribimos toString para que use el método de la clase padre
+    @Override
+    public String toString() {
+        return super.toString() + "\t" + cantPuertas + " puertas";
+    }
+}
+
+// ==================================================================================
+// CLASE MOTO 
+// Implementación del Ejercicio 1 (Interface Ventas) con lógica 8% + 10%.
+// ==================================================================================
+class Moto extends Vehiculo implements Ventas {
+    // Nota: Esta nueva versión ya no usa el campo 'cilindrada'.
+
+    // Constructor con parámetros
+    public Moto(String marca, int modelo, String patente, int kilometraje) {
+        super(marca, modelo, patente, kilometraje);
+    }
+
+    // --- EJERCICIO 1: IMPLEMENTACIÓN DE INTERFAZ ---
+    @Override
+    public double calcularPrecioVenta(double precioBase, int anioActual) {
+        // 1. Calcular años de uso
+        int aniosDeUso = anioActual - this.modelo;
+        
+        // 2. Depreciación: 8% por año para motos (depreciación rápida)
+        double depreciacion = aniosDeUso * 0.08; 
+
+        // 3. Descuento fijo (Descuento extra del 10%)
+        double descuentoMoto = 0.1; 
+
+        // 4. Aplicar la depreciación
+        double precioConDepreciacion = precioBase * (1 - depreciacion);
+        
+        // 5. Aplicar el descuento fijo al precio ya depreciado
+        double precioFinal = precioConDepreciacion * (1 - descuentoMoto);
+        
+        return Math.max(precioFinal, 0); // Asegurar que no sea negativo
+    }
+
+    // Implementación del método abstracto
+    @Override
+    public String verTipoDeVehiculo() {
+        return "🏍️";
+    }
+
+    // El toString ya está en la clase padre y es correcto para la moto.
+}
+
+// ==================================================================================
+// CLASE INVENTARIO (Tu código, integrando el Ejercicio 4)
+// ==================================================================================
+class Inventario {
+
+    private ArrayList<Auto> autos;
+    private ArrayList<Moto> motos;
+
+    public Inventario() {
+        this.autos = new ArrayList<>();
+        this.motos = new ArrayList<>();
+    }
+
+    // ================ MÉTODOS CRUD PARA AUTOS ================
+    public boolean agregarAuto(Auto auto) {
+        // Usa el equals implícitamente o compara patentes como haces aquí
+        if (!autos.stream().anyMatch(a -> a.getPatente().equals(auto.getPatente()))) {
+            autos.add(auto);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean actualizarAuto(String patente, Auto autoActualizado) {
+        for (int i = 0; i < autos.size(); i++) {
+            if (autos.get(i).getPatente().equals(patente)) {
+                autos.set(i, autoActualizado);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // ================ MÉTODOS CRUD PARA MOTOS ================
+    public boolean agregarMoto(Moto moto) {
+        if (!motos.stream().anyMatch(m -> m.getPatente().equals(moto.getPatente()))) {
+            motos.add(moto);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean actualizarMoto(String patente, Moto motoActualizada) {
+        for (int i = 0; i < motos.size(); i++) {
+            if (motos.get(i).getPatente().equals(patente)) {
+                motos.set(i, motoActualizada);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // ================ MÉTODOS DE CONSULTA (Ejercicio 4) ================
+    
+    // Este es el método CLAVE del Ejercicio 4: Buscar en dos listas
+    public Vehiculo buscarVehiculo(String patente) {
+        // 1. Busca en autos
+        for (Auto auto : autos) {
+            if (auto.getPatente().equals(patente)) {
+                return auto;
+            }
+        }
+        // 2. Busca en motos
+        for (Moto moto : motos) {
+            if (moto.getPatente().equals(patente)) {
+                return moto;
+            }
+        }
+        // 3. Retorna null
+        return null;
+    }
+
+    public boolean eliminarVehiculo(String patente) {
+        boolean eliminadoDeAutos = autos.removeIf(auto -> auto.getPatente().equals(patente));
+        boolean eliminadoDeMotos = motos.removeIf(moto -> moto.getPatente().equals(patente));
+        return eliminadoDeAutos || eliminadoDeMotos;
+    }
+
+    public String getCantidadDeVehiculos() {
+        return "Total de vehículos: " + (autos.size() + motos.size());
+    }
+
+    public void listarTodosLosVehiculos() {
+        System.out.println("=== INVENTARIO DE VEHÍCULOS ===");
+        System.out.println("\nAUTOS (" + autos.size() + "):");
+        autos.forEach(auto -> System.out.println(auto.toString()));
+        System.out.println("\nMOTOS (" + motos.size() + "):");
+        motos.forEach(moto -> System.out.println(moto.toString()));
+        System.out.println("\n" + getCantidadDeVehiculos());
+    }
+
+    public boolean existeVehiculo(String patente) {
+        return buscarVehiculo(patente) != null;
+    }
+}
